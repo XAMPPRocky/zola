@@ -256,6 +256,7 @@ impl Site {
         // so we do need to populate it first.
         self.populate_taxonomies()?;
         self.register_early_global_fns();
+        self.populate_fluent()?;
         self.populate_sections();
         self.render_markdown()?;
         self.register_tera_global_fns();
@@ -629,6 +630,19 @@ impl Site {
             Some(s) => s.meta.insert_anchor_links,
             None => InsertAnchor::None,
         }
+    }
+
+    pub fn populate_fluent(&mut self) -> Result<()> {
+        if std::fs::metadata(&self.config.fluent_dir).is_ok() {
+            let loader =
+                fluent_templates::ArcLoader::builder(&self.config.fluent_dir, self.config.default_language.parse().map_err(|e| format!("{}", e))?)
+                .shared_resources(Some(&*self.config.shared_fluent_resources))
+                .build()
+                .map_err(|e| e.to_string())?;
+            self.tera.register_function("fluent", fluent_templates::FluentLoader::new(loader));
+        }
+
+        Ok(())
     }
 
     /// Find out the direct subsections of each subsection if there are some
