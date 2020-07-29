@@ -1,7 +1,7 @@
 pub mod languages;
-pub mod taxonomies;
 pub mod link_checker;
 pub mod slugify;
+pub mod taxonomies;
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -10,6 +10,7 @@ use globset::{Glob, GlobSet, GlobSetBuilder};
 use serde_derive::{Deserialize, Serialize};
 use syntect::parsing::{SyntaxSet, SyntaxSetBuilder};
 use toml::Value as Toml;
+use unic_langid::{langid, LanguageIdentifier};
 
 use crate::highlighting::THEME_SET;
 use crate::theme::Theme;
@@ -25,7 +26,6 @@ pub enum Mode {
     Serve,
     Check,
 }
-
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
@@ -45,18 +45,18 @@ pub struct Config {
     /// The location of the fluent localisation files.
     pub shared_fluent_resources: Vec<PathBuf>,
     /// The language used in the site. Defaults to "en"
-    pub default_language: String,
+    pub default_language: LanguageIdentifier,
     /// The list of supported languages outside of the default one
     pub languages: Vec<languages::Language>,
 
     /// Languages list and translated strings
     ///
-    /// The `String` key of `HashMap` is a language name, the value should be toml crate `Table`
+    /// The key of the `HashMap` is a `LanguageIdentifier`, the value should be toml crate `Table`
     /// with String key representing term and value another `String` representing its translation.
     ///
     /// The attribute is intentionally not public, use `get_translation()` method for translating
     /// key into different language.
-    translations: HashMap<String, languages::TranslateTerm>,
+    translations: HashMap<LanguageIdentifier, languages::TranslateTerm>,
 
     /// Whether to highlight all code blocks found in markdown files. Defaults to false
     pub highlight_code: bool,
@@ -147,7 +147,8 @@ impl Config {
         }
 
         for taxonomy in config.taxonomies.iter_mut() {
-            if taxonomy.lang.is_empty() {
+            // Use default language if undefined
+            if taxonomy.lang.language.as_str() == "und" {
                 taxonomy.lang = config.default_language.clone();
             }
         }
@@ -236,7 +237,7 @@ impl Config {
     }
 
     /// Returns the codes of all additional languages
-    pub fn languages_codes(&self) -> Vec<&str> {
+    pub fn languages_codes(&self) -> Vec<&LanguageIdentifier> {
         self.languages.iter().map(|l| l.code.as_ref()).collect()
     }
 
@@ -263,7 +264,11 @@ impl Config {
         self.highlight_code = false;
     }
 
-    pub fn get_translation<S: AsRef<str>>(&self, lang: S, key: S) -> Result<String> {
+    pub fn get_translation<S: AsRef<str>, L: AsRef<LanguageIdentifier>>(
+        &self,
+        lang: L,
+        key: S,
+    ) -> Result<String> {
         let terms = self.translations.get(lang.as_ref()).ok_or_else(|| {
             Error::msg(format!("Translation for language '{}' is missing", lang.as_ref()))
         })?;
@@ -292,7 +297,7 @@ impl Default for Config {
             highlight_theme: "base16-ocean-dark".to_string(),
             fluent_dir: String::new(),
             shared_fluent_resources: Vec::new(),
-            default_language: "en".to_string(),
+            default_language: langid!("en"),
             languages: Vec::new(),
             generate_feed: false,
             feed_limit: None,
@@ -318,6 +323,8 @@ impl Default for Config {
 mod tests {
     use super::*;
     use utils::slugs::SlugifyStrategy;
+
+    use unic_langid::langid;
 
     #[test]
     fn can_import_valid_config() {
@@ -447,22 +454,22 @@ title = "A title"
     #[test]
     fn can_use_present_translation() {
         let config = Config::parse(CONFIG_TRANSLATION).unwrap();
-        assert_eq!(config.get_translation("fr", "title").unwrap(), "Un titre");
-        assert_eq!(config.get_translation("en", "title").unwrap(), "A title");
+        assert_eq!(config.get_translation(langid!("fr"), "title").unwrap(), "Un titre");
+        assert_eq!(config.get_translation(langid!("en"), "title").unwrap(), "A title");
     }
 
     #[test]
-    fn error_on_absent_translation_lang() {
+    fn error_on_und_translation_lang() {
         let config = Config::parse(CONFIG_TRANSLATION).unwrap();
-        let error = config.get_translation("absent", "key").unwrap_err();
+        let error = config.get_translation(LanguageIdentifier::default(), "key").unwrap_err();
 
-        assert_eq!("Translation for language 'absent' is missing", format!("{}", error));
+        assert_eq!("Translation for language 'und' is missing", format!("{}", error));
     }
 
     #[test]
     fn error_on_absent_translation_key() {
         let config = Config::parse(CONFIG_TRANSLATION).unwrap();
-        let error = config.get_translation("en", "absent").unwrap_err();
+        let error = config.get_translation(langid!("en"), "absent").unwrap_err();
 
         assert_eq!("Translation key 'absent' for language 'en' is missing", format!("{}", error));
     }

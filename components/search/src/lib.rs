@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use elasticlunr::{Index, Language};
 use lazy_static::lazy_static;
+use unic_langid::LanguageIdentifier;
 
 use errors::{bail, Result};
 use library::{Library, Section};
@@ -29,8 +30,8 @@ lazy_static! {
 /// the language given
 /// Errors if the language given is not available in Elasticlunr
 /// TODO: is making `in_search_index` apply to subsections of a `false` section useful?
-pub fn build_index(lang: &str, library: &Library) -> Result<String> {
-    let language = match Language::from_code(lang) {
+pub fn build_index(lang: &LanguageIdentifier, library: &Library) -> Result<String> {
+    let language = match Language::from_code(lang.language.as_str()) {
         Some(l) => l,
         None => {
             bail!("Tried to build search index for language {} which is not supported", lang);
@@ -40,7 +41,7 @@ pub fn build_index(lang: &str, library: &Library) -> Result<String> {
     let mut index = Index::with_language(language, &["title", "body"]);
 
     for section in library.sections_values() {
-        if section.lang == lang {
+        if &section.lang == lang {
             add_section_to_index(&mut index, section, library);
         }
     }
