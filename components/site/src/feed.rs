@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use rayon::prelude::*;
 use serde_derive::Serialize;
 use tera::Context;
+use unic_langid::LanguageIdentifier;
 
 use crate::Site;
 use errors::Result;
@@ -29,7 +30,7 @@ impl<'a> SerializedFeedTaxonomyItem<'a> {
 pub fn render_feed(
     site: &Site,
     all_pages: Vec<&Page>,
-    lang: &str,
+    lang: &LanguageIdentifier,
     base_path: Option<&PathBuf>,
     additional_context_fn: impl Fn(Context) -> Context,
 ) -> Result<Option<String>> {
