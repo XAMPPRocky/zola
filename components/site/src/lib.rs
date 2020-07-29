@@ -791,7 +791,7 @@ impl Site {
     ) -> Result<()> {
         ensure_directory_exists(&self.output_path)?;
 
-        let feed = match feed::render_feed(self, all_pages, &lang.to_string(), base_path, additional_context_fn)?
+        let feed = match feed::render_feed(self, all_pages, &lang, base_path, additional_context_fn)?
         {
             Some(v) => v,
             None => return Ok(()),
