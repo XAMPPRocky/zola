@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
 use tera::{Context, Tera};
+use unic_langid::LanguageIdentifier;
 
 use errors::{bail, Result};
+use std::path::PathBuf;
 
 static DEFAULT_TPL: &str = include_str!("default_tpl.html");
 
@@ -24,24 +26,78 @@ pub fn render_template(
     tera: &Tera,
     context: Context,
     theme: &Option<String>,
+    base_path: &PathBuf,
 ) -> Result<String> {
+    let mut template_name = "";
+    let mut tera = tera.clone();
+    let theme_template_name: String;
+
     // check if it is in the templates
     if tera.templates.contains_key(name) {
-        return tera.render(name, &context).map_err(std::convert::Into::into);
+        template_name = name;
     }
 
     // check if it is part of a theme
     if let Some(ref t) = *theme {
-        let theme_template_name = format!("{}/templates/{}", t, name);
+        theme_template_name = format!("{}/templates/{}", t, name);
         if tera.templates.contains_key(&theme_template_name) {
-            return tera.render(&theme_template_name, &context).map_err(std::convert::Into::into);
+            template_name = &theme_template_name;
         }
     }
 
     // check if it is part of ZOLA_TERA defaults
     let default_name = format!("__zola_builtins/{}", name);
     if tera.templates.contains_key(&default_name) {
-        return tera.render(&default_name, &context).map_err(std::convert::Into::into);
+        template_name = &default_name;
+    }
+
+    if !template_name.is_empty() {
+
+        // WIP: `fluent` function that's aware of the page's language and allows inherintance
+        // of `.ftl` files
+        if let Some(lang) = context.get("lang") {
+            let lang = match lang.as_str() {
+                // FIXME: error handling. Should not fail because it's already been deserailized once
+                Some(id) => id.parse::<LanguageIdentifier>().unwrap(),
+                None => bail!("Can't get page language")
+            };
+
+            // base_path is not set for internal templates like shortcodes
+            if !base_path.to_string_lossy().is_empty() {
+                // fluent-templates does not yet support choosing which files to load
+                /*
+                let _template_chain = {
+                    let mut tmp: Vec<&str> = Vec::new();
+                    tmp.push(template_name);
+                    let parents: Vec<&str> =
+                    tera.templates.get(template_name).unwrap().parents.iter().map(|s| &**s).collect();
+                    tmp.extend(parents);
+                    tmp
+                };
+                */
+
+                // TODO: map templates to .ftl files
+                // TODO: load locales from themes too. fluent-templates only supports 1 search path
+
+                let site_locales = {
+                    let mut tmp = base_path.clone();
+                    tmp.push("/locales");
+                    tmp
+                };
+
+                if std::fs::metadata(&site_locales).is_ok(){
+                    let loader = fluent_templates::ArcLoader::builder(&site_locales,lang)
+                    // TODO: put locales/common.ftl if exists
+                    .shared_resources(None)
+                    .build()
+                    .map_err(|e| e.to_string())?;
+
+                    tera.register_function("fluent", fluent_templates::FluentLoader::new(loader));
+                }
+            }
+        }
+
+        return tera.render(template_name, &context).map_err(std::convert::Into::into);
     }
 
     // maybe it's a default one?

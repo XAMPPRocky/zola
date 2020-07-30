@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 use serde_derive::Serialize;
 use slotmap::DefaultKey;
@@ -140,6 +141,7 @@ impl Taxonomy {
         tera: &Tera,
         config: &Config,
         library: &Library,
+        base_path: &PathBuf
     ) -> Result<String> {
         let mut context = Context::new();
         context.insert("config", config);
@@ -152,7 +154,7 @@ impl Taxonomy {
         );
         context.insert("current_path", &format!("/{}/{}", self.kind.name, item.slug));
 
-        render_template(&format!("{}/single.html", self.kind.name), tera, context, &config.theme)
+        render_template(&format!("{}/single.html", self.kind.name), tera, context, &config.theme, base_path)
             .map_err(|e| {
                 Error::chain(format!("Failed to render single term {} page.", self.kind.name), e)
             })
@@ -163,6 +165,7 @@ impl Taxonomy {
         tera: &Tera,
         config: &Config,
         library: &Library,
+        base_path: &PathBuf
     ) -> Result<String> {
         let mut context = Context::new();
         context.insert("config", config);
@@ -174,7 +177,7 @@ impl Taxonomy {
         context.insert("current_url", &config.make_permalink(&self.kind.name));
         context.insert("current_path", &self.kind.name);
 
-        render_template(&format!("{}/list.html", self.kind.name), tera, context, &config.theme)
+        render_template(&format!("{}/list.html", self.kind.name), tera, context, &config.theme, base_path)
             .map_err(|e| {
                 Error::chain(format!("Failed to render a list of {} page.", self.kind.name), e)
             })

@@ -283,7 +283,7 @@ impl Page {
     }
 
     /// Renders the page using the default layout, unless specified in front-matter
-    pub fn render_html(&self, tera: &Tera, config: &Config, library: &Library) -> Result<String> {
+    pub fn render_html(&self, tera: &Tera, config: &Config, library: &Library, base_path: &PathBuf) -> Result<String> {
         let tpl_name = match self.meta.template {
             Some(ref l) => l,
             None => "page.html",
@@ -296,7 +296,7 @@ impl Page {
         context.insert("page", &self.to_serialized(library));
         context.insert("lang", &self.lang);
 
-        render_template(&tpl_name, tera, context, &config.theme).map_err(|e| {
+        render_template(&tpl_name, tera, context, &config.theme, base_path).map_err(|e| {
             Error::chain(format!("Failed to render page '{}'", self.file.path.display()), e)
         })
     }

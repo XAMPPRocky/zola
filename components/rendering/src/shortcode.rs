@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use lazy_static::lazy_static;
 use pest::iterators::Pair;
 use pest::Parser;
@@ -117,7 +119,7 @@ fn render_shortcode(
 
     let template_name = format!("shortcodes/{}.html", name);
 
-    let res = utils::templates::render_template(&template_name, &context.tera, tera_context, &None)
+    let res = utils::templates::render_template(&template_name, &context.tera, tera_context, &None, &PathBuf::default())
         .map_err(|e| Error::chain(format!("Failed to render {} shortcode", name), e))?;
 
     // Small hack to avoid having multiple blank lines because of Tera tags for example

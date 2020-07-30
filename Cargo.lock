@@ -2165,7 +2165,6 @@ version = "0.1.0"
 dependencies = [
  "config",
  "errors",
- "fluent-templates",
  "front_matter",
  "glob",
  "imageproc",
@@ -2778,6 +2777,7 @@ version = "0.1.0"
 dependencies = [
  "errors",
  "filetime",
+ "fluent-templates",
  "percent-encoding",
  "serde",
  "serde_derive",
@@ -2785,6 +2785,7 @@ dependencies = [
  "tempfile",
  "tera",
  "toml",
+ "unic-langid",
  "unicode-segmentation",
  "walkdir",
 ]

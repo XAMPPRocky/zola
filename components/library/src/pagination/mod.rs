@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 use serde_derive::Serialize;
 use slotmap::DefaultKey;
@@ -209,6 +210,7 @@ impl<'a> Paginator<'a> {
         config: &Config,
         tera: &Tera,
         library: &Library,
+        base_path: &PathBuf
     ) -> Result<String> {
         let mut context = Context::new();
         context.insert("config", &config);
@@ -228,7 +230,7 @@ impl<'a> Paginator<'a> {
         context.insert("current_path", &pager.path);
         context.insert("paginator", &self.build_paginator_context(pager));
 
-        render_template(&self.template, tera, context, &config.theme)
+        render_template(&self.template, tera, context, &config.theme, base_path)
             .map_err(|e| Error::chain(format!("Failed to render pager {}", pager.index), e))
     }
 }

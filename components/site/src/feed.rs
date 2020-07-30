@@ -74,7 +74,7 @@ pub fn render_feed(
 
     context = additional_context_fn(context);
 
-    let feed = render_template(feed_filename, &site.tera, context, &site.config.theme)?;
+    let feed = render_template(feed_filename, &site.tera, context, &site.config.theme, &site.base_path)?;
 
     Ok(Some(feed))
 }
