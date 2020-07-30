@@ -210,7 +210,7 @@ impl<'a> Paginator<'a> {
         config: &Config,
         tera: &Tera,
         library: &Library,
-        base_path: &PathBuf
+        base_path: &PathBuf,
     ) -> Result<String> {
         let mut context = Context::new();
         context.insert("config", &config);

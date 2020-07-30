@@ -459,7 +459,12 @@ impl Site {
         create_directory(&current_path)?;
 
         // Finally, create a index.html file there with the page rendered
-        let output = page.render_html(&self.tera, &self.config, &self.library.read().unwrap(), &self.base_path)?;
+        let output = page.render_html(
+            &self.tera,
+            &self.config,
+            &self.library.read().unwrap(),
+            &self.base_path,
+        )?;
         create_file(&current_path.join("index.html"), &self.inject_livereload(output))?;
 
         // Copy any asset we found previously into the same directory as the index.html
@@ -632,7 +637,8 @@ impl Site {
         ensure_directory_exists(&self.output_path)?;
         let mut context = Context::new();
         context.insert("config", &self.config);
-        let output = render_template("404.html", &self.tera, context, &self.config.theme, &self.base_path)?;
+        let output =
+            render_template("404.html", &self.tera, context, &self.config.theme, &self.base_path)?;
         create_file(&self.output_path.join("404.html"), &self.inject_livereload(output))
     }
 
@@ -643,7 +649,13 @@ impl Site {
         context.insert("config", &self.config);
         create_file(
             &self.output_path.join("robots.txt"),
-            &render_template("robots.txt", &self.tera, context, &self.config.theme, &self.base_path)?,
+            &render_template(
+                "robots.txt",
+                &self.tera,
+                context,
+                &self.config.theme,
+                &self.base_path,
+            )?,
         )
     }
 
@@ -669,8 +681,12 @@ impl Site {
         } else {
             self.output_path.join(&taxonomy.kind.name)
         };
-        let list_output =
-            taxonomy.render_all_terms(&self.tera, &self.config, &self.library.read().unwrap(), &self.base_path)?;
+        let list_output = taxonomy.render_all_terms(
+            &self.tera,
+            &self.config,
+            &self.library.read().unwrap(),
+            &self.base_path,
+        )?;
         create_directory(&output_path)?;
         create_file(&output_path.join("index.html"), &self.inject_livereload(list_output))?;
         let library = self.library.read().unwrap();
@@ -685,8 +701,13 @@ impl Site {
                         &Paginator::from_taxonomy(&taxonomy, item, &library),
                     )?;
                 } else {
-                    let single_output =
-                        taxonomy.render_term(item, &self.tera, &self.config, &library, &self.base_path)?;
+                    let single_output = taxonomy.render_term(
+                        item,
+                        &self.tera,
+                        &self.config,
+                        &library,
+                        &self.base_path,
+                    )?;
                     create_directory(&path)?;
                     create_file(&path.join("index.html"), &self.inject_livereload(single_output))?;
                 }
@@ -729,7 +750,13 @@ impl Site {
             // Create single sitemap
             let mut context = Context::new();
             context.insert("entries", &all_sitemap_entries);
-            let sitemap = &render_template("sitemap.xml", &self.tera, context, &self.config.theme, &self.base_path)?;
+            let sitemap = &render_template(
+                "sitemap.xml",
+                &self.tera,
+                context,
+                &self.config.theme,
+                &self.base_path,
+            )?;
             create_file(&self.output_path.join("sitemap.xml"), sitemap)?;
             return Ok(());
         }
@@ -741,7 +768,13 @@ impl Site {
         {
             let mut context = Context::new();
             context.insert("entries", &chunk);
-            let sitemap = &render_template("sitemap.xml", &self.tera, context, &self.config.theme, &self.base_path)?;
+            let sitemap = &render_template(
+                "sitemap.xml",
+                &self.tera,
+                context,
+                &self.config.theme,
+                &self.base_path,
+            )?;
             let file_name = format!("sitemap{}.xml", i + 1);
             create_file(&self.output_path.join(&file_name), sitemap)?;
             let mut sitemap_url: String = self.config.make_permalink(&file_name);
@@ -776,11 +809,11 @@ impl Site {
     ) -> Result<()> {
         ensure_directory_exists(&self.output_path)?;
 
-        let feed = match feed::render_feed(self, all_pages, &lang, base_path, additional_context_fn)?
-        {
-            Some(v) => v,
-            None => return Ok(()),
-        };
+        let feed =
+            match feed::render_feed(self, all_pages, &lang, base_path, additional_context_fn)? {
+                Some(v) => v,
+                None => return Ok(()),
+            };
         let feed_filename = &self.config.feed_filename;
 
         if let Some(ref base) = base_path {
@@ -856,8 +889,12 @@ impl Site {
                 &Paginator::from_section(&section, &self.library.read().unwrap()),
             )?;
         } else {
-            let output =
-                section.render_html(&self.tera, &self.config, &self.library.read().unwrap(), &self.base_path)?;
+            let output = section.render_html(
+                &self.tera,
+                &self.config,
+                &self.library.read().unwrap(),
+                &self.base_path,
+            )?;
             create_file(&output_path.join("index.html"), &self.inject_livereload(output))?;
         }
 

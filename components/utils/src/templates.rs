@@ -52,14 +52,13 @@ pub fn render_template(
     }
 
     if !template_name.is_empty() {
-
         // WIP: `fluent` function that's aware of the page's language and allows inherintance
         // of `.ftl` files
         if let Some(lang) = context.get("lang") {
             let lang = match lang.as_str() {
                 // FIXME: error handling. Should not fail because it's already been deserailized once
                 Some(id) => id.parse::<LanguageIdentifier>().unwrap(),
-                None => bail!("Can't get page language")
+                None => bail!("Can't get page language"),
             };
 
             // base_path is not set for internal templates like shortcodes
@@ -85,12 +84,12 @@ pub fn render_template(
                     tmp
                 };
 
-                if std::fs::metadata(&site_locales).is_ok(){
-                    let loader = fluent_templates::ArcLoader::builder(&site_locales,lang)
-                    // TODO: put locales/common.ftl if exists
-                    .shared_resources(None)
-                    .build()
-                    .map_err(|e| e.to_string())?;
+                if std::fs::metadata(&site_locales).is_ok() {
+                    let loader = fluent_templates::ArcLoader::builder(&site_locales, lang)
+                        // TODO: put locales/common.ftl if exists
+                        .shared_resources(None)
+                        .build()
+                        .map_err(|e| e.to_string())?;
 
                     tera.register_function("fluent", fluent_templates::FluentLoader::new(loader));
                 }

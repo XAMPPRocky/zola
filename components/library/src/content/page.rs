@@ -283,7 +283,13 @@ impl Page {
     }
 
     /// Renders the page using the default layout, unless specified in front-matter
-    pub fn render_html(&self, tera: &Tera, config: &Config, library: &Library, base_path: &PathBuf) -> Result<String> {
+    pub fn render_html(
+        &self,
+        tera: &Tera,
+        config: &Config,
+        library: &Library,
+        base_path: &PathBuf,
+    ) -> Result<String> {
         let tpl_name = match self.meta.template {
             Some(ref l) => l,
             None => "page.html",

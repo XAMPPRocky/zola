@@ -341,7 +341,7 @@ pub fn markdown_to_html(content: &str, context: &RenderContext) -> Result<Render
                     context.tera,
                     c,
                     &None,
-                    &PathBuf::default()
+                    &PathBuf::default(),
                 )
                 .map_err(|e| Error::chain("Failed to render anchor link template", e))?;
                 anchors_to_insert.push((anchor_idx, Event::Html(anchor_link.into())));

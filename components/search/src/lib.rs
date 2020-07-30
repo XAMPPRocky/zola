@@ -81,7 +81,11 @@ fn fill_index(
 /// the language given
 /// Errors if the language given is not available in Elasticlunr
 /// TODO: is making `in_search_index` apply to subsections of a `false` section useful?
-pub fn build_index(lang: &LanguageIdentifier, library: &Library, config: &Config) -> Result<String> {
+pub fn build_index(
+    lang: &LanguageIdentifier,
+    library: &Library,
+    config: &Config,
+) -> Result<String> {
     let language = match Language::from_code(lang.language.as_str()) {
         Some(l) => l,
         None => {
