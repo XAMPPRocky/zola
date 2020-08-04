@@ -88,6 +88,17 @@ Decode the variable from base64.
 Zola adds a few global functions to [those in Tera](https://tera.netlify.com/docs#built-in-functions)
 to make it easier to develop complex sites.
 
+### `fluent`
+<!-- FIXME: implicit language should be the page's language -->
+Gets the translation of the given `key` (also called a `message` in Fluent terms) for the given `lang` or the 
+`default_language`. Please refer to [_Localization_](@/documentation/templates/localization.md) for
+complete documentation.
+
+```jinja2
+{{/* fluent(key="next-page") */}}
+{{/* fluent(key="next-page", lang="fr") */}}
+{{ fluent(key="reading-time-seconds", seconds=page.reading_time) }}
+```
 
 ### `get_page`
 Takes a path to an `.md` file and returns the associated page.
@@ -277,7 +288,7 @@ The format is also taken into account when caching, so a request will be sent tw
 different formats.
 
 ### `trans`
-Gets the translation of the given `key`, for the `default_language` or the `lang`uage given
+Gets the translation of the given `key`, for the `default_language` or the `lang`uage given. This is going to be deprecated in favor of [`fluent`](#fluent).
 
 ```jinja2
 {{/* trans(key="title") */}}

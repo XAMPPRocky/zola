@@ -21,7 +21,7 @@ base_url = "mywebsite.com"
 title = ""
 description = ""
 
-# The default language; used in feeds.
+# The default language; used in feeds. Must be a valid Unicode language identifier.
 default_language = "en"
 
 # The site theme to use.
@@ -63,7 +63,7 @@ generate_feed = false
 #
 taxonomies = []
 
-# The additional languages for the site.
+# The additional languages for the site. code must be a valid Unicode language identifier.
 # Example:
 #     languages = [
 #       {code = "fr", feed = true}, # there will be a feed for French content
@@ -86,7 +86,8 @@ ignored_content = []
 # A list of directories used to search for additional `.sublime-syntax` files.
 extra_syntaxes = []
 
-# Optional translation object. The key if present should be a language code.
+# Optional translation object. The key if present should be a Unicode language identifier.
+# This will be deprecated in favor of the Fluent-based localization system.
 # Example:
 #     default_language = "fr"
 #
@@ -96,7 +97,7 @@ extra_syntaxes = []
 #
 #     [translations.en]
 #     title = "A title"
-
+[translations]
 
 # Configuration of the link checker.
 [link_checker]
@@ -133,8 +134,6 @@ include_content = true
 # truncate_content_length = 100
 
 
-# Optional translation object. Keys should be language codes.
-[translations]
 
 # You can put any kind of data here. The data
 # will be accessible in all templates.

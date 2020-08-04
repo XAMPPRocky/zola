@@ -42,3 +42,8 @@ file with the desired front-matter options as there is no language fallback.
 ## Output
 Zola outputs the translated content with a base URL of `{base_url}/{code}/`.
 The only exception to this is if you are setting a translated page `path` directly in the front matter.
+
+## In templates
+If you want to make your template work with multiple languages, you can use the
+[Fluent](https://www.projectfluent.org/)-based localization system. See
+[_Templates / Localization_](@/documentation/templates/localization.md).

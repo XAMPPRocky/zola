@@ -10,12 +10,13 @@ After running `zola init`, you should see the following structure in your direct
 .
 ├── config.toml
 ├── content
+├── locales
 ├── sass
 ├── static
 ├── templates
 └── themes
 
-5 directories, 1 file
+6 directories, 1 file
 ```
 
 Here's a high-level overview of each of these directories and `config.toml`.
@@ -30,6 +31,14 @@ Each child directory of the `content` directory represents a [section](@/documen
 that contains [pages](@/documentation/content/page.md) (your `.md` files).
 
 To learn more, read the [content overview page](@/documentation/content/overview.md).
+
+## `locales`
+Contains [Fluent](https://www.projectfluent.org/) localization resources. `common.ftl` is loaded for all pages, while `.ftl`
+files in subdirectories are only loaded if the directory's name matches or is a variant (i.e. different region or script)
+of the page's language.
+
+To learn more, read the [multilingual site documentation](@/documentation/content/multilingual.md). This feature is being
+actively developed, so major changes might occur in the future.
 
 ## `sass`
 Contains the [Sass](http://sass-lang.com) files to be compiled. Non-Sass files will be ignored.
