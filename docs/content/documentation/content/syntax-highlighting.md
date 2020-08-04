@@ -50,6 +50,7 @@ Here is a full list of supported languages and their short names:
 - Elm -> ["elm"]
 - Erlang -> ["Emakefile", "emakefile", "erl", "escript", "hrl"]
 - F# -> ["fs", "fsi", "fsx"]
+- Fluent -> ["ftl"]
 - Fortran (Fixed Form) -> ["F", "F77", "FOR", "FPP", "f", "f77", "for", "fpp"]
 - Fortran (Modern) -> ["F03", "F08", "F90", "F95", "f03", "f08", "f90", "f95"]
 - Fortran Namelist -> ["namelist"]

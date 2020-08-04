@@ -67,3 +67,6 @@
 [submodule "sublime/syntaxes/GDScript-sublime"]
 	path = sublime/syntaxes/GDScript-sublime
 	url = https://github.com/beefsack/GDScript-sublime.git
+[submodule "sublime/syntaxes/SublimeFluent"]
+	path = sublime/syntaxes/SublimeFluent
+	url = https://github.com/SirNickolas/SublimeFluent

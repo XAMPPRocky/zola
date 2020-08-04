@@ -27,7 +27,7 @@ The `fluent` function returns a localized message. Its arguments are:
 
 #### Simple message
 Given the Fluent files
-```fluent
+```ftl
 # locales/en/example.ftl
 next-page = Next page
 
@@ -47,7 +47,7 @@ Next page
 
 #### Message with arguments
 Given the Fluent file
-```fluent
+```ftl
 # locales/en/example.ftl
 reading-time-seconds =
     { $seconds ->
@@ -68,7 +68,7 @@ Reading time: 20 seconds
 
 #### Message with markup
 Given the Fluent files
-```fluent
+```ftl
 # locales/common.ftl
 -program = Zola
     .website = https://getzola.org
