@@ -105,6 +105,7 @@ fn populate(path: &Path, compile_sass: bool, config: &str) -> Result<()> {
     }
     create_file(&path.join("config.toml"), &config)?;
     create_dir(path.join("content"))?;
+    create_dir(path.join("locales"))?;
     create_dir(path.join("templates"))?;
     create_dir(path.join("static"))?;
     create_dir(path.join("themes"))?;
@@ -183,6 +184,7 @@ mod tests {
 
         assert_eq!(true, dir.join("config.toml").exists());
         assert_eq!(true, dir.join("content").exists());
+        assert_eq!(true, dir.join("locales").exists());
         assert_eq!(true, dir.join("templates").exists());
         assert_eq!(true, dir.join("static").exists());
         assert_eq!(true, dir.join("themes").exists());
@@ -203,6 +205,7 @@ mod tests {
         assert_eq!(true, dir.exists());
         assert_eq!(true, dir.join("config.toml").exists());
         assert_eq!(true, dir.join("content").exists());
+        assert_eq!(true, dir.join("locales").exists());
         assert_eq!(true, dir.join("templates").exists());
         assert_eq!(true, dir.join("static").exists());
         assert_eq!(true, dir.join("themes").exists());
