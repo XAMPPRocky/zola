@@ -33,24 +33,41 @@ impl Trans {
 }
 impl TeraFn for Trans {
     fn call(&self, args: &HashMap<String, Value>) -> Result<Value> {
-        let key = required_arg!(String, args.get("key"), "`trans` requires a `key` argument.");
-        let lang =
-            match optional_arg!(String, args.get("lang"), "`trans`: `lang` must be a string.") {
-                Some(lang) => LanguageIdentifier::from_str(&lang).map_err(|_| {
-                    Error::msg(format!(
-                        "`trans`: Failed to retreive term translation {}, invalid language {}",
-                        key, lang
-                    ))
-                })?,
-                None => self.config.default_language.clone(),
-            };
+        let key = required_arg!(String, args.get("key"), "`trans` requires a `key` argument");
+        let lang = match optional_arg!(String, args.get("lang"), "`trans`: `lang` must be a string")
+        {
+            Some(lang) => LanguageIdentifier::from_str(&lang)
+                .map_err(|e| Error::chain(format!("Invalid language `{}`", lang), e))?,
+            None => self.config.default_language.clone(),
+        };
+        let no_fallback = optional_arg!(
+            bool,
+            args.get("no_fallback"),
+            "`trans`: `no_fallback` must be a boolean"
+        )
+        .unwrap_or(false);
 
-        let term = self
-            .config
-            .get_translation(lang, key)
-            .map_err(|e| Error::chain("Failed to retreive term translation", e))?;
-
-        Ok(to_value(term).unwrap())
+        match self.config.get_translation(lang, &key) {
+            Ok(term) => Ok(to_value(term).unwrap()),
+            Err(err) => {
+                if no_fallback {
+                    Err(Error::chain("Failed to retreive term translation", err))
+                } else {
+                    self.config
+                        .get_translation(&self.config.default_language, &key)
+                        .or_else(|e| {
+                            self.config.extra.get(&key).map(|term| term.to_string()).ok_or(
+                                Error::chain(
+                                    format!("Key `{}` not found in `config.extra`", &key),
+                                    Error::chain(e, err),
+                                ),
+                            )
+                        })
+                        .map(|term| to_value(term).unwrap())
+                        .map_err(|e| Error::chain("Failed to retreive term translation", e))
+                }
+            }
+        }
     }
 }
 
@@ -143,7 +160,7 @@ impl TeraFn for GetUrl {
         let lang =
             match optional_arg!(String, args.get("lang"), "`get_url`: `lang` must be a string.") {
                 Some(lang) => LanguageIdentifier::from_str(&lang)
-                    .map_err(|_| Error::msg(format!("`get_url`: invalid language {}", lang)))?,
+                    .map_err(|e| Error::chain(format!("Invalid language `{}`", lang), e))?,
                 None => self.config.default_language.clone(),
             };
 
@@ -362,9 +379,8 @@ impl TeraFn for GetTaxonomyUrl {
             args.get("lang"),
             "`get_taxonomy_url`: `lang` must be a string"
         ) {
-            Some(lang) => LanguageIdentifier::from_str(&lang).map_err(|_| {
-                Error::msg(format!("`get_taxonomy_url` received an invalid language: {}", lang))
-            })?,
+            Some(lang) => LanguageIdentifier::from_str(&lang)
+                .map_err(|e| Error::chain(format!("Invalid language `{}`", lang), e))?,
             None => self.default_lang.clone(),
         };
 
@@ -483,9 +499,8 @@ impl TeraFn for GetTaxonomy {
             args.get("lang"),
             "`get_taxonomy`: `lang` must be a string"
         ) {
-            Some(lang) => LanguageIdentifier::from_str(&lang).map_err(|_| {
-                Error::msg(format!("`get_taxonomy_url` received an invalid language: {}", lang))
-            })?,
+            Some(lang) => LanguageIdentifier::from_str(&lang)
+                .map_err(|e| Error::chain(format!("Invalid language `{}`", lang), e))?,
             None => self.default_lang.clone(),
         };
 
@@ -737,10 +752,21 @@ title = "A title"
     }
 
     #[test]
-    fn error_on_absent_translation_lang() {
+    fn fall_back_on_absent_translation_lang() {
         let mut args = HashMap::new();
         args.insert("lang".to_string(), to_value("absent").unwrap());
         args.insert("key".to_string(), to_value("title").unwrap());
+
+        let config = Config::parse(TRANS_CONFIG).unwrap();
+        assert_eq!(Trans::new(config).call(&args).unwrap(), "Un titre");
+    }
+
+    #[test]
+    fn error_on_absent_translation_lang_no_fallback() {
+        let mut args = HashMap::new();
+        args.insert("lang".to_string(), to_value("absent").unwrap());
+        args.insert("key".to_string(), to_value("title").unwrap());
+        args.insert("no_fallback".to_string(), to_value(true).unwrap());
 
         let config = Config::parse(TRANS_CONFIG).unwrap();
         let error = Trans::new(config).call(&args).unwrap_err();

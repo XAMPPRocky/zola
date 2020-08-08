@@ -89,7 +89,6 @@ Zola adds a few global functions to [those in Tera](https://tera.netlify.com/doc
 to make it easier to develop complex sites.
 
 ### `fluent`
-<!-- FIXME: implicit language should be the page's language -->
 Gets the translation of the given `key` (also called a `message` in Fluent terms) for the given `lang` or the 
 `default_language`. Please refer to [_Localization_](@/documentation/templates/localization.md) for
 complete documentation.
@@ -288,11 +287,16 @@ The format is also taken into account when caching, so a request will be sent tw
 different formats.
 
 ### `trans`
-Gets the translation of the given `key`, for the `default_language` or the `lang`uage given. This is going to be deprecated in favor of [`fluent`](#fluent).
+Gets the translation of the given `key`, for the `default_language` or the `lang`uage given. Unless `no_fallback`
+is set to `true`, it will try to look it up for the `default_language` and from `config.extra` if key is not
+available for the desired language. 
+
+Theme authors should prefer [`fluent`](#fluent) for localizing their templates. 
 
 ```jinja2
 {{/* trans(key="title") */}}
 {{/* trans(key="title", lang="fr") */}}
+{{/* trans(key="title", no_fallback=true) */}}
 ```
 
 ### `resize_image`

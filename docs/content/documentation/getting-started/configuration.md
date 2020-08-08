@@ -87,7 +87,8 @@ ignored_content = []
 extra_syntaxes = []
 
 # Optional translation object. The key if present should be a Unicode language identifier.
-# This will be deprecated in favor of the Fluent-based localization system.
+# These can be accessed via the `trans` function. Template authors should prefer the 
+# Fluent-based localization system.
 # Example:
 #     default_language = "fr"
 #
