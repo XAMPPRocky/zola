@@ -33,7 +33,7 @@ that contains [pages](@/documentation/content/page.md) (your `.md` files).
 To learn more, read the [content overview page](@/documentation/content/overview.md).
 
 ## `locales`
-Contains [Fluent](https://www.projectfluent.org/) localization resources. `common.ftl` is loaded for all pages, while `.ftl`
+Contains [Fluent](https://www.projectfluent.org/) localization resources. `core.ftl` is loaded for all pages, while `.ftl`
 files in subdirectories are only loaded if the directory's name matches or is a variant (i.e. different region or script)
 of the page's language.
 

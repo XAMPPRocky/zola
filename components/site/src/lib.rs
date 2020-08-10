@@ -368,16 +368,25 @@ impl Site {
     }
 
     pub fn populate_fluent(&mut self) -> Result<()> {
-        if std::fs::metadata(&self.config.fluent_dir).is_ok() {
-            let loader = fluent_templates::ArcLoader::builder(
-                &self.config.fluent_dir,
-                self.config.default_language.clone(),
-            )
-            .shared_resources(Some(&*self.config.shared_fluent_resources))
-            .build()
-            .map_err(|e| e.to_string())?;
-            self.tera.register_function("fluent", fluent_templates::FluentLoader::new(loader));
+        let mut shared_default = vec![self.base_path.join("locales/core.ftl")];
+        if let Some(theme) = &self.config.theme {
+            shared_default.push(self.base_path.join("themes").join(theme).join("locales/core.ftl"));
         }
+
+        let mut shared = self.config.extra_shared_fluent_resources.clone();
+        // A missing `core.ftl` should not be a fatal error
+        shared.append(
+            &mut shared_default.into_iter().filter(|p| std::fs::metadata(p).is_ok()).collect(),
+        );
+
+        let loader = fluent_templates::ArcLoader::builder(
+            &self.base_path.join("locales"),
+            self.config.default_language.clone(),
+        )
+        .shared_resources(Some(&shared))
+        .build()
+        .map_err(|e| e.to_string())?;
+        self.tera.register_function("fluent", fluent_templates::FluentLoader::new(loader));
 
         Ok(())
     }

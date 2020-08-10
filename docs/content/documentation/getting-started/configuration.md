@@ -73,6 +73,9 @@ taxonomies = []
 #
 languages = []
 
+# Extra Fluent localization resources to load for all languages alongside `locales/core.ftl`.
+extra_shared_fluent_resources = []
+
 # When set to "true", the Sass files in the `sass` directory are compiled.
 compile_sass = false
 
