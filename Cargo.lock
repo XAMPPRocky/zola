@@ -2165,7 +2165,6 @@ version = "0.1.0"
 dependencies = [
  "config",
  "errors",
- "fluent-templates",
  "front_matter",
  "glob",
  "imageproc",
@@ -2382,6 +2381,7 @@ dependencies = [
  "config",
  "csv",
  "errors",
+ "fluent-templates",
  "image",
  "imageproc",
  "lazy_static",

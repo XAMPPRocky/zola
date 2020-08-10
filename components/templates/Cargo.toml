@@ -29,5 +29,10 @@ version = "0.10"
 default-features = false
 features = ["blocking", "rustls-tls"]
 
+[dependencies.fluent-templates]
+version = "0.5"
+default-features = false
+features = ["tera"]
+
 [dev-dependencies]
 mockito = "0.27"

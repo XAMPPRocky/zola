@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::PathBuf;
+use std::result::Result as StdResult;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex, RwLock};
 use std::{fs, io, result};
 
+use fluent_templates::{ArcLoader, FluentLoader};
 use sha2::{Digest, Sha256, Sha384, Sha512};
 use svg_metadata as svg;
 use tera::{from_value, to_value, Error, Function as TeraFn, Result, Value};
@@ -510,6 +512,36 @@ impl TeraFn for GetTaxonomy {
                 Err(format!("`get_taxonomy` received an unknown taxonomy as kind: {}", kind).into())
             }
         }
+    }
+}
+pub struct Fluent {
+    loader: FluentLoader<ArcLoader>,
+}
+impl Fluent {
+    pub fn build(base_path: PathBuf, config: Config) -> StdResult<Self, String> {
+        let mut shared_default = vec![base_path.join("locales/core.ftl")];
+        if let Some(theme) = &config.theme {
+            shared_default.push(base_path.join("themes").join(theme).join("locales/core.ftl"));
+        }
+
+        let mut shared = config.extra_shared_fluent_resources.clone();
+        // A missing `core.ftl` should not be a fatal error
+        shared.append(
+            &mut shared_default.into_iter().filter(|p| std::fs::metadata(p).is_ok()).collect(),
+        );
+
+        let loader =
+            ArcLoader::builder(&base_path.join("locales"), config.default_language.clone())
+                .shared_resources(Some(&shared))
+                .build()
+                .map_err(|e| e.to_string())?;
+
+        Ok(Self { loader: FluentLoader::new(loader) })
+    }
+}
+impl TeraFn for Fluent {
+    fn call(&self, args: &HashMap<String, Value>) -> Result<Value> {
+        self.loader.call(args)
     }
 }
 

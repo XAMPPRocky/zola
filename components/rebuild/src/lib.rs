@@ -118,7 +118,7 @@ fn delete_element(site: &mut Site, path: &Path, is_section: bool) -> Result<()> 
     site.populate_sections();
     site.populate_taxonomies()?;
     // Ensure we have our fn updated so it doesn't contain the permalink(s)/section/page deleted
-    site.register_early_global_fns();
+    site.register_early_global_fns()?;
     site.register_tera_global_fns();
     // Deletion is something that doesn't happen all the time so we
     // don't need to optimise it too much
@@ -246,7 +246,7 @@ fn handle_page_editing(site: &mut Site, path: &Path) -> Result<()> {
         None => {
             site.populate_sections();
             site.populate_taxonomies()?;
-            site.register_early_global_fns();
+            site.register_early_global_fns()?;
             site.register_tera_global_fns();
             site.process_images()?;
             // No need to optimise that yet, we can revisit if it becomes an issue

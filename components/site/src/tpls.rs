@@ -49,7 +49,7 @@ pub fn load_tera(path: &Path, config: &Config) -> Result<Tera> {
 }
 
 /// Adds global fns that are to be available to shortcodes while rendering markdown
-pub fn register_early_global_fns(site: &mut Site) {
+pub fn register_early_global_fns(site: &mut Site) -> Result<()> {
     site.tera.register_function(
         "get_url",
         global_fns::GetUrl::new(
@@ -78,6 +78,11 @@ pub fn register_early_global_fns(site: &mut Site) {
             site.content_path.clone(),
         ]),
     );
+    site.tera.register_function(
+        "fluent",
+        global_fns::Fluent::build(site.base_path.clone(), site.config.clone())?,
+    );
+    Ok(())
 }
 
 /// Functions filled once we have parsed all the pages/sections only, so not available in shortcodes

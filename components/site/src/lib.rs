@@ -206,8 +206,7 @@ impl Site {
         // taxonomy Tera fns are loaded in `register_early_global_fns`
         // so we do need to populate it first.
         self.populate_taxonomies()?;
-        self.register_early_global_fns();
-        self.populate_fluent()?;
+        self.register_early_global_fns()?;
         self.populate_sections();
         self.render_markdown()?;
         self.register_tera_global_fns();
@@ -306,8 +305,8 @@ impl Site {
     }
 
     // TODO: remove me in favour of the direct call to the fn once rebuild has changed
-    pub fn register_early_global_fns(&mut self) {
-        tpls::register_early_global_fns(self);
+    pub fn register_early_global_fns(&mut self) -> Result<()> {
+        tpls::register_early_global_fns(self)
     }
 
     // TODO: remove me in favour of the direct call to the fn once rebuild has changed
@@ -365,30 +364,6 @@ impl Site {
             Some(s) => s.meta.insert_anchor_links,
             None => InsertAnchor::None,
         }
-    }
-
-    pub fn populate_fluent(&mut self) -> Result<()> {
-        let mut shared_default = vec![self.base_path.join("locales/core.ftl")];
-        if let Some(theme) = &self.config.theme {
-            shared_default.push(self.base_path.join("themes").join(theme).join("locales/core.ftl"));
-        }
-
-        let mut shared = self.config.extra_shared_fluent_resources.clone();
-        // A missing `core.ftl` should not be a fatal error
-        shared.append(
-            &mut shared_default.into_iter().filter(|p| std::fs::metadata(p).is_ok()).collect(),
-        );
-
-        let loader = fluent_templates::ArcLoader::builder(
-            &self.base_path.join("locales"),
-            self.config.default_language.clone(),
-        )
-        .shared_resources(Some(&shared))
-        .build()
-        .map_err(|e| e.to_string())?;
-        self.tera.register_function("fluent", fluent_templates::FluentLoader::new(loader));
-
-        Ok(())
     }
 
     /// Find out the direct subsections of each subsection if there are some
